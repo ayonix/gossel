@@ -1,0 +1,63 @@
+syntax = "proto3";
+package gosselproto;
+
+service gosselcore {
+	rpc Connect(stream Msg) returns (stream Msg) {}
+}
+
+message User {
+	string user = 1;
+	string password = 2;
+}
+
+message Msg {
+	oneof message_type {
+		Network network = 1;
+		Control control = 2;
+		Subscribe subscribe = 3;
+		Irc irc = 4;
+		Auth auth = 5;
+	}
+}
+
+message Irc {
+	string command = 1;
+	Prefix prefix = 2;
+	repeated string params = 3;
+	string trailing = 4;
+	string network = 5;
+
+	message Prefix {
+		string name = 1;
+		string user = 2;
+		string host = 3;
+	}
+}
+
+message Control{}
+
+message Auth {
+	string username = 1;
+	string password = 2;
+}
+
+message Subscribe {
+	string network = 1;
+	string channel = 2;
+	bool unsubscribe = 3;
+}
+
+message Network {
+	string name = 1;
+	string network = 2;
+	string password = 3;
+	bool tls = 4;
+	Identity identity = 5;
+	bool add = 6;
+}
+
+message Identity {
+	string username =1;
+	string realname =2;
+	string awaymsg = 3;
+}
