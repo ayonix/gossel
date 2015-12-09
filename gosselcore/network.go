@@ -156,13 +156,17 @@ func (n *Network) Send(m *irc.Message) error {
 }
 
 func (n *Network) SendProto(m *pb.Irc) {
-	n.SendQueue <- &irc.Message{
-		Command: m.Command,
-		Prefix: &irc.Prefix{
+	var pre *irc.Prefix
+	if m.Prefix != nil {
+		pre = &irc.Prefix{
 			Name: m.Prefix.Name,
 			User: m.Prefix.User,
 			Host: m.Prefix.Host,
-		},
+		}
+	}
+	n.SendQueue <- &irc.Message{
+		Command:  m.Command,
+		Prefix:   pre,
 		Params:   m.Params,
 		Trailing: m.Trailing,
 	}
