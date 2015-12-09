@@ -5,10 +5,8 @@ import (
 	"io"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/ayonix/gossel/gosselproto"
-	"github.com/sorcix/irc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -38,19 +36,8 @@ func main() {
 	}
 	log.Println("Sent auth")
 
-	err = stream.Send(networkMsg("freenode", "chat.freenode.net:6667", "", false, identityMsg("gossel_test", "Gossel Test", "Not here right now"), true))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// err = stream.Send(subscribeMsg("freenode", "#gossel_test", false))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	wg.Add(1)
 	go func() {
-
 		for {
 			in, err := stream.Recv()
 			if err == io.EOF {
@@ -59,27 +46,15 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Printf("Got message: %v \n", in)
+			switch x := in.MessageType.(type) {
+			case *gosselproto.Msg_Irc:
+				log.Printf("<< %v \n", x.Irc)
+			default:
+			}
 		}
 		wg.Done()
 	}()
 
-	wg.Add(1)
-	go func() {
-		time.Sleep(10 * time.Second)
-		err = stream.Send(ircMsg("freenode", irc.JOIN, nil, []string{"#gossel_test"}, ""))
-		time.Sleep(20 * time.Second)
-
-		err = stream.Send(ircMsg("freenode", irc.PRIVMSG, nil, []string{"#gossel_test"}, "My code looks so ugly, HELP ME!"))
-		if err != nil {
-			log.Fatal(err)
-		}
-		// err = stream.Send(networkMsg("freenode", "", "", false, &gosselproto.Identity{}, false))
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		wg.Done()
-	}()
 	wg.Wait()
 }
 
