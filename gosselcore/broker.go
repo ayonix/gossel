@@ -39,12 +39,21 @@ func (b *Broker) Unsubscribe(ch chan *pb.Msg, net, channel string) {
 
 // check which channels to send the message to
 func (b *Broker) Broadcast(network_name string, msg *irc.Message) {
-	// TODO Handle subscriptions
-	for ch := range b.subscriptions {
-		_ = "breakpoint"
-		ch <- toProto(network_name, msg)
+	if msg.Command == irc.PRIVMSG && msg.Params[0][0] == '#' {
+		handle := fmt.Sprintf("%s/%s", network_name, msg.Params[0])
+		for ch := range b.subscriptions {
+			if b.subscriptions[ch][handle] {
+				ch <- toProto(network_name, msg)
+			}
+		}
+	} else {
+		for ch := range b.subscriptions {
+			ch <- toProto(network_name, msg)
+		}
 	}
 }
+
+func checkSubscription() {}
 
 func toProto(network string, msg *irc.Message) *pb.Msg {
 	return &pb.Msg{
