@@ -1,8 +1,5 @@
-# gossel #
+# gossel
 The plan of this project is to have a proof of concept of a nice IRC client like [Quassel](http://quassel-irc.org).
-
-# Architecture #
-![Architecture overview](doc/core.png)
 
 ## Warning: ##
 The code is pretty messy at the moment :)
